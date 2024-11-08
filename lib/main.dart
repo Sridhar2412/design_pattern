@@ -14,7 +14,7 @@ class MainApp extends StatefulWidget {
   _MainAppState createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> {
+class _MainAppState extends State<MainApp> with SingleTickerProviderStateMixin {
   final List<IWidgetsFactory> widgetsFactoryList = const [
     MaterialWidgetsFactory(),
     CupertinoWidgetsFactory(),
@@ -50,61 +50,131 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _setSliderValue(double value) => setState(() => _sliderValue = value);
-
+  late AnimationController animationController =
+      AnimationController(vsync: this, duration: const Duration(seconds: 5))
+        ..repeat(reverse: true);
+  late Animation<double> animation =
+      CurvedAnimation(parent: animationController, curve: Curves.fastOutSlowIn);
+  late Animation<Offset> animations =
+      Tween<Offset>(end: Offset.zero, begin: const Offset(0.0, 2.0))
+          .animate(animationController);
   @override
   Widget build(BuildContext context) {
     final PostApi postApi = PostApi();
     return MaterialApp(
       home: Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            FactorySelection(
-              widgetsFactoryList: widgetsFactoryList,
-              selectedIndex: _selectedFactoryIndex,
-              onChanged: _setSelectedFactoryIndex,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Widgets showcase',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Process indicator',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 20),
-            _activityIndicator.render(),
-            const SizedBox(height: 20),
-            Text(
-              'Slider ($_sliderValueString%)',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 20),
-            _slider.render(_sliderValue, _setSliderValue),
-            const SizedBox(height: 20),
-            Text(
-              'Adapter',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 20),
-            ListView.builder(
-                itemCount: postApi.getPosts().length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  final Post post = postApi.getPosts()[index];
-                  return ListTile(
-                    title: Text(post.title),
-                    subtitle: Text(post.bio),
-                  );
-                })
-            // ElevatedButton(
-            //     onPressed: () async => await AndroidDialog().show(context),
-            //     child: const Center(
-            //       child: Text('Submit'),
-            //     ))
-          ],
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FactorySelection(
+                widgetsFactoryList: widgetsFactoryList,
+                selectedIndex: _selectedFactoryIndex,
+                onChanged: _setSelectedFactoryIndex,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Widgets showcase',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Process indicator',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              _activityIndicator.render(),
+              const SizedBox(height: 20),
+              Text(
+                'Slider ($_sliderValueString%)',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              _slider.render(_sliderValue, _setSliderValue),
+              const SizedBox(height: 20),
+              Text(
+                'Adapter',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              ListView.builder(
+                  itemCount: postApi.getPosts().length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    final Post post = postApi.getPosts()[index];
+                    return ListTile(
+                      title: Text(post.title),
+                      subtitle: Text(post.bio),
+                    );
+                  }),
+              // ElevatedButton(
+              //     onPressed: () async => await AndroidDialog().show(context),
+              //     child: const Center(
+              //       child: Text('Submit'),
+              //     ))
+              Text(
+                'Scale transition',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              ScaleTransition(
+                  alignment: Alignment.bottomCenter,
+                  scale: animation,
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.red),
+                  )),
+              const SizedBox(height: 20),
+
+              Text(
+                'Rotation transition',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              RotationTransition(
+                  alignment: Alignment.bottomCenter,
+                  turns: animation,
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.blue),
+                  )),
+              const SizedBox(height: 20),
+              Text(
+                'Size transition',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              SizeTransition(
+                  axis: Axis.horizontal,
+                  sizeFactor: animation,
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.yellow),
+                  )),
+              const SizedBox(height: 20),
+              Text(
+                'Slide transition',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 20),
+              SlideTransition(
+                  position: animations,
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle, color: Colors.green),
+                  )),
+              const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
